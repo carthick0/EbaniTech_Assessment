@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model bill {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  amount    Float
+  pdfUrl    String?
+  createdAt DateTime @default(now())
+
+  @@index([patientId], map: "Bill_patientId_fkey")
+}
+
+model lab {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  reportUrl String
+  createdAt DateTime @default(now())
+
+  @@index([patientId], map: "Lab_patientId_fkey")
+}
+
+model patient {
+  id        Int      @id @default(autoincrement())
+  name      String
+  age       Int
+  gender    String
+  contact   String
+  doctorId  Int
+  createdAt DateTime @default(now())
+
+  @@index([doctorId], map: "Patient_doctorId_fkey")
+}
+
+model treatment {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  doctorId     Int
+  diagnosis    String?   @db.VarChar(255)
+  prescription String?   @db.VarChar(255)
+  notes        String?   @db.Text
+  createdAt    DateTime? @default(now()) @db.DateTime(0)
+
+  @@index([doctorId], map: "fk_doctor")
+  @@index([patientId], map: "fk_patient")
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique(map: "User_email_key")
+  password  String
+  role      user_role
+  createdAt DateTime  @default(now())
+}
+
+enum user_role {
+  ADMIN
+  DOCTOR
+  RECEPTIONIST
+  LAB
+}
